@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Packer</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #1e40af;
+            --bg: #f3f4f6;
+            --card: #ffffff;
+            --text: #1f2937;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 { color: var(--primary); margin-bottom: 0.5rem; }
+        
+        .card {
+            background: var(--card);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        /* Form Styles */
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; font-weight: 600; margin-bottom: 0.5rem; }
+        
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box; /* Fixes padding issues */
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        button:hover { background-color: var(--secondary); }
+
+        /* Results Styles */
+        #resultSection { display: none; }
+        
+        .category-header {
+            border-bottom: 2px solid var(--bg);
+            padding-bottom: 0.5rem;
+            margin-top: 1.5rem;
+            color: var(--secondary);
+        }
+
+        .packing-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .packing-item input[type="checkbox"] { margin-right: 10px; }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        .btn-outline:hover { background-color: #eff6ff; }
+
+        @media (max-width: 600px) {
+            .action-buttons { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>✈️ Smart Packer</h1>
+        <p>Generate your optimal packing list in seconds.</p>
+    </header>
+
+    <div class="card" id="formSection">
+        <form id="tripForm">
+            <div class="form-group">
+                <label>Destination</label>
+                <input type="text" id="destination" placeholder="e.g. Tokyo, Japan" required>
+            </div>
+
+            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <label>Trip Duration (Days)</label>
+                    <input type="number" id="days" min="1" value="3" required>
+                </div>
+                <div>
+                    <label>Start Date</label>
+                    <input type="date" id="startDate" required>
+                </div>
+            </div>
+
+            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <label>Gender</label>
+                    <select id="gender">
+                        <option value="neutral">Prefer not to say</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Weather</label>
+                    <select id="weather">
+                        <option value="neutral">Mild / Mixed</option>
+                        <option value="hot">Hot / Beach</option>
+                        <option value="cold">Cold / Snow</option>
+                        <option value="rain">Rainy</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Trip Type</label>
+                <select id="type">
+                    <option value="leisure">Leisure / City Walk</option>
+                    <option value="business">Business</option>
+                    <option value="hiking">Hiking / Active</option>
+                    <option value="pool">Resort / Poolside</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Extras (Check all that apply)</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" id="laundry"> I will do laundry</label>
+                    <label class="checkbox-item"><input type="checkbox" id="gym"> Gym Access</label>
+                    <label class="checkbox-item"><input type="checkbox" id="formal"> Formal Event</label>
+                    <label class="checkbox-item"><input type="checkbox" id="swimming"> Swimming</label>
+                    <label class="checkbox-item"><input type="checkbox" id="glasses"> Glasses/Contacts</label>
+                    <label class="checkbox-item"><input type="checkbox" id="meds"> Daily Meds</label>
+                    <label class="checkbox-item"><input type="checkbox" id="period"> Period expected</label>
+                    <label class="checkbox-item"><input type="checkbox" id="wfh"> Work Remote</label>
+                </div>
+            </div>
+
+            <button type="submit">Generate List</button>
+        </form>
+    </div>
+
+    <div class="card" id="resultSection">
+        <h2 id="listTitle">Your Packing List</h2>
+        <div id="listContainer"></div>
+        
+        <div class="action-buttons">
+            <button class="btn-outline" onclick="exportToCalendar()">📅 Add to Calendar</button>
+            <button class="btn-outline" onclick="emailList()">📧 Email List</button>
+            <button onclick="window.print()">🖨️ Print / PDF</button>
+            <button class="btn-outline" onclick="location.reload()">🔄 Start Over</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- DATABASE OF ITEMS ---
+    // Rules: 
+    // - 'base': Always included
+    // - 'q': Quantity logic ('1', 'days', 'half-days', etc)
+    // - 'tags': Arrays of strings that match form inputs
+    
+    const itemDatabase = [
+        // ESSENTIALS
+        { name: "Passport / ID", category: "Essentials", q: "1", tags: ["base"] },
+        { name: "Wallet + Cards", category: "Essentials", q: "1", tags: ["base"] },
+        { name: "Phone + Charger", category: "Essentials", q: "1", tags: ["base"] },
+        { name: "Headphones", category: "Essentials", q: "1", tags: ["base"] },
+        { name: "Power Bank", category: "Essentials", q: "1", tags: ["base"] },
+        { name: "Travel Adapter", category: "Essentials", q: "1", tags: ["base"] },
+
+        // CLOTHING - TOPS
+        { name: "T-Shirts/Casual Tops", category: "Clothing", q: "days", tags: ["base"] },
+        { name: "Dress Shirts/Blouse", category: "Clothing", q: "days_div_2", tags: ["business"] },
+        { name: "Blazer/Suit Jacket", category: "Clothing", q: "1", tags: ["business"] },
+        { name: "Sweater/Hoodie", category: "Clothing", q: "1", tags: ["cold", "neutral"] },
+        { name: "Heavy Coat", category: "Clothing", q: "1", tags: ["cold"] },
+        { name: "Rain Jacket", category: "Clothing", q: "1", tags: ["rain", "hiking"] },
+        
+        // CLOTHING - BOTTOMS
+        { name: "Pants/Jeans", category: "Clothing", q: "days_div_3", tags: ["base"] },
+        { name: "Dress Trousers", category: "Clothing", q: "1", tags: ["business", "formal"] },
+        { name: "Shorts", category: "Clothing", q: "days_div_2", tags: ["hot"] },
+        { name: "Leggings/Gym Shorts", category: "Clothing", q: "2", tags: ["gym", "hiking"] },
+
+        // CLOTHING - INTIMATES
+        { name: "Underwear", category: "Clothing", q: "days_plus_1", tags: ["base"] },
+        { name: "Socks", category: "Clothing", q: "days_plus_1", tags: ["base"] },
+        { name: "Bras", category: "Clothing", q: "days_div_2", tags: ["female"] },
+        { name: "Sports Bra", category: "Clothing", q: "2", tags: ["female", "gym", "hiking"] },
+        { name: "Pyjamas", category: "Clothing", q: "days_div_3", tags: ["base"] },
+
+        // SHOES
+        { name: "Walking Shoes", category: "Shoes", q: "1", tags: ["base"] },
+        { name: "Dress Shoes", category: "Shoes", q: "1", tags: ["business", "formal"] },
+        { name: "Flip Flops", category: "Shoes", q: "1", tags: ["hot", "pool", "swimming"] },
+        { name: "Hiking Boots", category: "Shoes", q: "1", tags: ["hiking"] },
+
+        // TOILETRIES
+        { name: "Toothbrush + Paste", category: "Toiletries", q: "1", tags: ["base"] },
+        { name: "Deodorant", category: "Toiletries", q: "1", tags: ["base"] },
+        { name: "Skincare / Face Wash", category: "Toiletries", q: "1", tags: ["base"] },
+        { name: "Razor / Shaving Kit", category: "Toiletries", q: "1", tags: ["base"] },
+        { name: "Hair Products", category: "Toiletries", q: "1", tags: ["base"] },
+        { name: "Makeup Kit", category: "Toiletries", q: "1", tags: ["female", "makeup_user"] },
+        { name: "Feminine Hygiene", category: "Toiletries", q: "1", tags: ["female", "period"] },
+        
+        // HEALTH / EXTRAS
+        { name: "Prescription Meds", category: "Health", q: "days", tags: ["meds"] },
+        { name: "Vitamins/Painkillers", category: "Health", q: "1", tags: ["base"] },
+        { name: "Glasses / Contacts Case", category: "Health", q: "1", tags: ["glasses"] },
+        { name: "Contact Solution", category: "Health", q: "1", tags: ["glasses"] },
+        { name: "Sunscreen", category: "Health", q: "1", tags: ["hot", "hiking", "pool", "swimming"] },
+        { name: "Laptop + Charger", category: "Electronics", q: "1", tags: ["business", "wfh"] },
+        { name: "Swimsuit", category: "Clothing", q: "1", tags: ["swimming", "pool", "hot"] },
+    ];
+
+    let currentList = [];
+    let tripDetails = {};
+
+    document.getElementById('tripForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // 1. Gather Data
+        const days = parseInt(document.getElementById('days').value);
+        tripDetails = {
+            destination: document.getElementById('destination').value,
+            days: days,
+            startDate: document.getElementById('startDate').value,
+            gender: document.getElementById('gender').value,
+            weather: document.getElementById('weather').value,
+            type: document.getElementById('type').value,
+            laundry: document.getElementById('laundry').checked,
+            gym: document.getElementById('gym').checked,
+            formal: document.getElementById('formal').checked,
+            swimming: document.getElementById('swimming').checked,
+            glasses: document.getElementById('glasses').checked,
+            meds: document.getElementById('meds').checked,
+            period: document.getElementById('period').checked,
+            wfh: document.getElementById('wfh').checked
+        };
+
+        // 2. Filter & Calculate
+        currentList = generatePackingList(tripDetails);
+
+        // 3. Render
+        renderList(currentList);
+        
+        // 4. Switch View
+        document.getElementById('formSection').style.display = 'none';
+        document.getElementById('resultSection').style.display = 'block';
+        document.getElementById('listTitle').innerText = `Packing for ${tripDetails.destination} (${tripDetails.days} days)`;
+    });
+
+    function generatePackingList(details) {
+        let finalItems = [];
+
+        // Helper Tags based on inputs
+        let activeTags = ['base'];
+        if (details.gender !== 'neutral') activeTags.push(details.gender);
+        activeTags.push(details.weather);
+        activeTags.push(details.type);
+        
+        if (details.gym) activeTags.push('gym');
+        if (details.formal) activeTags.push('formal');
+        if (details.swimming) activeTags.push('swimming');
+        if (details.glasses) activeTags.push('glasses');
+        if (details.meds) activeTags.push('meds');
+        if (details.period) activeTags.push('period');
+        if (details.wfh) activeTags.push('wfh');
+
+        itemDatabase.forEach(item => {
+            // Check if item shares ANY tag with activeTags
+            const isRelevant = item.tags.some(tag => activeTags.includes(tag));
+            
+            if (isRelevant) {
+                let qty = calculateQuantity(item.q, details.days, details.laundry);
+                if (qty > 0) {
+                    finalItems.push({ ...item, quantity: qty });
+                }
+            }
+        });
+
+        return finalItems;
+    }
+
+    function calculateQuantity(logic, days, doLaundry) {
+        let q = 1;
+        // Cap clothing at 7 days if doing laundry
+        let calcDays = (doLaundry && days > 7) ? 7 : days;
+
+        switch(logic) {
+            case '1': q = 1; break;
+            case '2': q = 2; break;
+            case 'days': q = calcDays; break;
+            case 'days_plus_1': q = calcDays + 1; break;
+            case 'days_div_2': q = Math.ceil(calcDays / 2); break;
+            case 'days_div_3': q = Math.ceil(calcDays / 3); break;
+            default: q = 1;
+        }
+        return q;
+    }
+
+    function renderList(list) {
+        const container = document.getElementById('listContainer');
+        container.innerHTML = '';
+
+        // Group by Category
+        const categories = {};
+        list.forEach(item => {
+            if (!categories[item.category]) categories[item.category] = [];
+            categories[item.category].push(item);
+        });
+
+        // HTML Gen
+        for (const [cat, items] of Object.entries(categories)) {
+            const catHeader = document.createElement('h3');
+            catHeader.className = 'category-header';
+            catHeader.innerText = cat;
+            container.appendChild(catHeader);
+
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'packing-item';
+                div.innerHTML = `
+                    <label>
+                        <input type="checkbox"> ${item.name}
+                    </label>
+                    <span style="font-weight:bold; color:var(--primary)">x${item.quantity}</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+    }
+
+    // --- EXPORT FUNCTIONS ---
+
+    function emailList() {
+        let body = `Here is my packing list for ${tripDetails.destination}:\n\n`;
+        currentList.forEach(item => {
+            body += `- [ ] ${item.name} (x${item.quantity})\n`;
+        });
+        window.location.href = `mailto:?subject=Packing List: ${tripDetails.destination}&body=${encodeURIComponent(body)}`;
+    }
+
+    function exportToCalendar() {
+        // Create an ICS file for the day BEFORE the trip
+        const tripStart = new Date(tripDetails.startDate);
+        // Reminder set for 1 day before
+        const reminderDate = new Date(tripStart);
+        reminderDate.setDate(tripStart.getDate() - 1);
+
+        const formatDate = (date) => date.toISOString().replace(/-|:|\.\d\d\d/g,"").substring(0,8);
+
+        let description = `Packing List for ${tripDetails.destination}:\\n\\n`;
+        currentList.forEach(item => {
+            description += `- ${item.name} (x${item.quantity})\\n`;
+        });
+
+        const icsContent = 
+`BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Smart Packer//EN
+BEGIN:VEVENT
+UID:${Date.now()}@smartpacker
+DTSTAMP:${formatDate(new Date())}T000000Z
+DTSTART;VALUE=DATE:${formatDate(reminderDate)}
+DTEND;VALUE=DATE:${formatDate(tripStart)}
+SUMMARY:Pack for ${tripDetails.destination}
+DESCRIPTION:${description}
+END:VEVENT
+END:VCALENDAR`;
+
+        const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.setAttribute('download', 'packing_list.ics');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
+
+</body>
+</html>
